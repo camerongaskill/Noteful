@@ -115,7 +115,7 @@ export default class AddNoteForm extends React.Component {
 						className='note_name'
 						name='note_name'
 						required
-						onChange={(e) => this.getNoteName(e)}
+						value={(e) => this.getNoteName(e)}
 					/>
 					<label htmlFor='note_content'>
 						Note Content:
@@ -128,7 +128,7 @@ export default class AddNoteForm extends React.Component {
 						className='note_content'
 						name='note_content'
 						required
-						onChange={(e) => this.getContentName(e)}
+						value={(e) => this.getContentName(e)}
 					/>
 					<label htmlFor='note_folder'>Choose a folder:</label>
 					<select

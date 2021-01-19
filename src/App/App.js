@@ -5,12 +5,11 @@ import NoteListNav from '../NoteListNav/NoteListNav';
 import NotePageNav from '../NotePageNav/NotePageNav';
 import NoteListMain from '../NoteListMain/NoteListMain';
 import NotePageMain from '../NotePageMain/NotePageMain';
-import dummyStore from '../dummy-store';
 import AddFolder from '../AddFolder/AddFolder';
 import AddNote from '../AddNote/AddNote';
 import ErrorComponent from '../ErrorComponent';
 import NotefulContext from '../NotefulContext';
-import { getNotesForFolder, findNote, findFolder } from '../notes-helpers';
+import { findNote, findFolder } from '../notes-helpers';
 import './App.css';
 
 class App extends Component {
@@ -19,10 +18,33 @@ class App extends Component {
 		folders: [],
 	};
 
-	componentDidMount() {
-		// fake date loading from API call
-		setTimeout(() => this.setState(dummyStore), 600);
-	}
+	fetchFolders = () => {
+		fetch('http://localhost:9090/folders')
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+				throw new Error(response.status);
+			})
+			.then((data) => {
+				this.setState({ folders: data });
+			})
+			.catch((error) => console.log(error.message));
+	};
+
+	fetchNotes = () => {
+		fetch('http://localhost:9090/notes')
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+				throw new Error(response.status);
+			})
+			.then((data) => {
+				this.setState({ notes: data });
+			})
+			.catch((error) => console.log(error.message));
+	};
 
 	handleDeleteNote = (noteId) => {
 		this.setState({
@@ -46,6 +68,11 @@ class App extends Component {
 		noteObj['content'] = content;
 		this.state.notes.push(noteObj);
 	};
+
+	componentDidMount() {
+		this.fetchFolders();
+		this.fetchNotes();
+	}
 
 	renderNavRoutes() {
 		const { notes, folders } = this.state;
@@ -90,16 +117,17 @@ class App extends Component {
 	}
 
 	render() {
-		const value = {
-			notes: this.state.notes,
-			folders: this.state.folders,
-			deleteNote: this.handleDeleteNote,
-			addFolder: this.handleAddFolder,
-			addNote: this.handleAddNote,
-		};
 		return (
 			<ErrorComponent>
-				<NotefulContext.Provider value={value}>
+				<NotefulContext.Provider
+					value={{
+						notes: this.state.notes,
+						folders: this.state.folders,
+						addFolder: this.handleAddFolder,
+						addNote: this.handleAddNote,
+						deleteNote: this.handleDeleteNote,
+					}}
+				>
 					<div className='App'>
 						<nav className='App__nav'>{this.renderNavRoutes()}</nav>
 						<header className='App__header'>

@@ -1,93 +1,44 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import NotefulContext from '../NotefulContext';
-import AddFolderError from './AddFolderError';
-import config from '../config';
+import { findNote, findFolder } from '../notes-helpers';
+import AddFolder from './AddFolder';
 import './AddFolder.css';
-import cuid from 'cuid';
 
 export default class AddFolderForm extends React.Component {
 	static defaultProps = {
-		onAddFolder: () => {},
+		history: {
+			goBack: () => {},
+		},
+		match: {
+			params: {},
+		},
 	};
-
 	static contextType = NotefulContext;
 
-	state = {
-		nameValidate: '',
-		touched: false,
+	handleAddFolder = (folderId) => {
+		this.props.history.push(`/`);
 	};
 
-	handleFolderError = (name) => {
-		this.setState({
-			nameValidate: name,
-			touched: true,
-		});
-	};
-
-	validateFolderName = () => {
-		const name = this.state.nameValidate.trim();
-		const charFilter = /^[a-zA-Z 0-9]*$/;
-		if (name.length === 0) {
-			return 'This field is required';
-		} else if (!charFilter.test(name)) {
-			return 'Cannot include special characters';
-		}
-	};
-
-	handleAddFolder = (e) => {
-		e.preventDefault();
-		const id = cuid();
-		const name = e.target.input_folder_name.value;
-		fetch(`${config.API_ENDPOINT}/folders`, {
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json',
-			},
-			body: JSON.stringify({ id: id, name: name }),
-		})
-			.then((res) => {
-				if (!res.ok) return res.json().then((e) => Promise.reject(e));
-			})
-			.then(() => {
-				this.context.addFolder(name, id);
-				this.props.onAddFolder(id);
-			})
-			.catch((error) => {
-				console.error('Error:', error);
-			});
-	};
 	render() {
-		const folderError = this.validateFolderName();
+		const { notes, folders } = this.context;
+		const { noteId } = this.props.match.params;
+		const note = findNote(notes, noteId) || {};
+		const folder = findFolder(folders, note.folderId);
 		return (
-			<div className='AddFolder'>
-				<form
-					className='add-folder-form'
-					onSubmit={(e) => this.handleAddFolder(e)}
-				>
-					<label htmlFor='input_folder_name'>Enter Folder Name</label>
-					<input
-						type='text'
-						name='input_folder_name'
-						id='input_folder_name'
-						className='input_folder_name'
-						required
-						onChange={(e) => this.handleFolderError(e.target.value)}
-					/>
-					{this.state.touched && <AddFolderError message={folderError} />}
-					<button
-						type='submit'
-						className='AddFolder__add-folder-button'
-						disabled={this.validateFolderName()}
-					>
-						Add Folder
-					</button>
-				</form>
+			<div className='AddFolderPage'>
+				<AddFolder onAddFolder={this.handleAddFolder} />
+				{folder && <h3 className='NotePageNav__folder-name'>{folder.name}</h3>}
 			</div>
 		);
 	}
 }
 
 AddFolderForm.propTypes = {
-	onAddFolder: PropTypes.func,
+	history: PropTypes.shape({
+		goBack: PropTypes.func,
+	}),
+	match: PropTypes.shape({
+		params: PropTypes.object,
+	}),
 };
