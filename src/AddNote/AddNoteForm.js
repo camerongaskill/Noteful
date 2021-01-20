@@ -115,7 +115,7 @@ export default class AddNoteForm extends React.Component {
 						className='note_name'
 						name='note_name'
 						required
-						value={(e) => this.getNoteName(e)}
+						onChange={(e) => this.getNoteName(e)}
 					/>
 					<label htmlFor='note_content'>
 						Note Content:
@@ -128,7 +128,7 @@ export default class AddNoteForm extends React.Component {
 						className='note_content'
 						name='note_content'
 						required
-						value={(e) => this.getContentName(e)}
+						onChange={(e) => this.getContentName(e)}
 					/>
 					<label htmlFor='note_folder'>Choose a folder:</label>
 					<select
@@ -138,9 +138,7 @@ export default class AddNoteForm extends React.Component {
 						onChange={(e) => this.getFolderId(e)}
 						required
 					>
-						<option selected disabled='disabled'>
-							Make a Selection
-						</option>
+						<option disabled='disabled'>Make a Selection</option>
 						{folders.map((folder) => (
 							<option value={folder.id} key={folder.id}>
 								{folder.name}
